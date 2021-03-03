@@ -2,12 +2,9 @@
   <div class="mapComponent">
     <img width="100" class="logo" src="../assets/share-now-logo.png" />
     <select class="location-selector" @change="onCityChange">
-      <option value="Hamburg">
-        Hamburg
-        </option>
-      <option value="Berlin">
-        Berlin
-        </option>
+      <option v-for="(city, i) in locationsNames" :key="i" :value="city">{{
+        city
+      }}</option>
     </select>
     <div class="map" id="map"></div>
   </div>
@@ -16,23 +13,23 @@
 <script lang="ts">
 import Vue from "vue";
 import L from "leaflet";
-import $ from "jquery";
-import _ from 'underscore';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet/dist/images/marker-shadow.png';
+import axios from "axios";
+import "leaflet/dist/leaflet.css";
+import "leaflet/dist/images/marker-shadow.png";
+import * as types from "@/common/types";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
   iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png")
 });
 
 export default Vue.extend({
-  name: "Home",
+  name: "Map",
   components: {},
   data: () => ({
-    locations: [],
-    map: null as L.Map | null,
+    locations: [] as types.Locations,
+    map: {} as L.Map
   }),
   mounted() {
     this.map = L.map("map", {
@@ -40,75 +37,81 @@ export default Vue.extend({
       zoom: 5,
       doubleClickZoom: false,
       layers: [
-        L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png", {
+        L.tileLayer(
+          "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png",
+          {
             maxZoom: 18,
             attribution:
-              '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
-          },
-        ),
-      ],
+              '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
+          }
+        )
+      ]
     });
 
     this.fetchLocations(this.map);
   },
 
   methods: {
-    async fetchLocations(map) {
-      $.get(
-        "https://web-chapter-coding-challenge-api-eu-central-1.dev.architecture.ridedev.io/api/architecture/web-chapter-coding-challenge-api/locations",
-        async (response: any) => {
-          const locations = response.data;
-          this.locations = locations;
-          for (const location of locations) {
-            await this.fetchCars(location.name, map);
-          }
-        },
+    async fetchLocations(map: L.Map): Promise<void> {
+      const response: types.Response = await axios.get(
+        "https://web-chapter-coding-challenge-api-eu-central-1.dev.architecture.ridedev.io/api/architecture/web-chapter-coding-challenge-api/locations"
       );
+      this.locations = response.data.data;
+      for (const location of this.locations) {
+        await this.fetchCars(location.name, map);
+      }
     },
 
-    async fetchCars(location, map) {
-      let response = await fetch(
-        `https://web-chapter-coding-challenge-api-eu-central-1.dev.architecture.ridedev.io/api/architecture/web-chapter-coding-challenge-api/vehicles/${location}`,
-      );
-      response = await response.json();
-
+    async fetchCars(locationName: string, map: L.Map): Promise<void> {
       const icons = [
         L.icon({
           iconRetinaUrl: require("../assets/car1.png"),
           iconUrl: require("../assets/car1.png"),
           shadowSize: [0, 0],
-          iconSize: [100, 100],
+          iconSize: [100, 100]
         }),
         L.icon({
           iconRetinaUrl: require("../assets/car2.png"),
           iconUrl: require("../assets/car2.png"),
           shadowSize: [0, 0],
-          iconSize: [106, 46],
+          iconSize: [106, 46]
         }),
         L.icon({
           iconRetinaUrl: require("../assets/car3.png"),
           iconUrl: require("../assets/car3.png"),
           shadowSize: [0, 0],
-          iconSize: [90, 90],
-        }),
+          iconSize: [90, 90]
+        })
       ];
 
-      const cars = response.data;
+      const response: types.ResponseCar = await axios.get(
+        `https://web-chapter-coding-challenge-api-eu-central-1.dev.architecture.ridedev.io/api/architecture/web-chapter-coding-challenge-api/vehicles/${locationName}`
+      );
+      const cars = response.data.data;
 
-      cars.forEach((car) => {
+      cars.forEach((car: types.Car) => {
         L.marker([car.position.latitude, car.position.longitude], {
-          icon: icons[Math.floor(Math.random() * icons.length)],
+          icon: icons[Math.floor(Math.random() * icons.length)]
         }).addTo(map);
       });
     },
-    onCityChange(event) {
-      const targetLocation = _.find(this.locations, (location) => location.name === event.target.value);
+
+    onCityChange(e: types.E): void {
+      const targetLocation: types.Location = this.locations.filter(
+        location => location.name === e.target.value
+      )[0];
       if (targetLocation) {
         const center = targetLocation.mapSection.center;
         this.map.setView(L.latLng(center.latitude, center.longitude), 10);
       }
-    },
+    }
   },
+
+  computed: {
+    locationsNames() {
+      return this.locations.map(location => location.name);
+    }
+  }
 });
 </script>
 
