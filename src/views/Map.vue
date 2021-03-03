@@ -53,7 +53,7 @@ export default Vue.extend({
     cars: [] as types.Cars,
     enableFilterModal: false,
     fuelAmount: 0,
-    layerGroup: {}
+    layerGroup: {} as L.LayerGroup
   }),
   async mounted() {
     this.map = L.map("map", {
