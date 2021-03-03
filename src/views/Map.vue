@@ -29,7 +29,8 @@ export default Vue.extend({
   components: {},
   data: () => ({
     locations: [] as types.Locations,
-    map: {} as L.Map
+    map: {} as L.Map,
+    cars: {} as types.Cars
   }),
   async mounted() {
     this.map = L.map("map", {
@@ -87,51 +88,61 @@ export default Vue.extend({
           12
         );
         this.map.removeLayer(marker);
-        this.fetchCars(location.name, this.map);
+        await this.fetchCars(location.name);
+        await this.drawCars();
       });
     },
 
-    async fetchCars(locationName: string, map: L.Map): Promise<void> {
-      const icons = [
-        L.icon({
-          iconRetinaUrl: require("../assets/car1.png"),
-          iconUrl: require("../assets/car1.png"),
-          shadowSize: [0, 0],
-          iconSize: [100, 100]
-        }),
-        L.icon({
-          iconRetinaUrl: require("../assets/car2.png"),
-          iconUrl: require("../assets/car2.png"),
-          shadowSize: [0, 0],
-          iconSize: [106, 46]
-        }),
-        L.icon({
-          iconRetinaUrl: require("../assets/car3.png"),
-          iconUrl: require("../assets/car3.png"),
-          shadowSize: [0, 0],
-          iconSize: [90, 90]
-        })
-      ];
-
+    async fetchCars(locationName: string): Promise<void> {
       const response: types.ResponseCar = await axios.get(
         `https://web-chapter-coding-challenge-api-eu-central-1.dev.architecture.ridedev.io/api/architecture/web-chapter-coding-challenge-api/vehicles/${locationName}`
       );
-      const cars = response.data.data;
-
-      cars.forEach((car: types.Car) => {
-        L.marker([car.position.latitude, car.position.longitude], {
-          icon: icons[Math.floor(Math.random() * icons.length)]
-        }).addTo(map);
-      });
+      this.cars = response.data.data;
     },
 
-    onCityChange(e: types.E): void {
+    async drawCars() {
+      const layerGroup = L.layerGroup(
+        this.cars.map(car => {
+          const fuelLevel =
+            car.fuel * 100 < 30
+              ? "red"
+              : car.fuel * 100 < 65
+              ? "yellow"
+              : "green";
+          const icon = L.divIcon({
+            className: "custom-div-icon",
+            html: `<div class='marker-pin ${fuelLevel}'></div>
+          <i class='${car.model}'></i>
+          <div class="car-fuel">${car.fuel * 100}</div>`,
+            iconSize: [30, 42],
+            iconAnchor: [15, 42]
+          });
+          const marker = L.marker(
+            [car.position.latitude, car.position.longitude],
+            {
+              icon: icon
+            }
+          );
+          return marker.on("click", () => {
+            this.map.setView(
+              [car.position.latitude, car.position.longitude],
+              20
+            );
+          });
+        })
+      );
+      this.map.addLayer(layerGroup);
+    },
+
+    async onCityChange(e: types.E): Promise<void> {
       const targetLocation: types.Location = this.locations.filter(
         location => location.name === e.target.value
       )[0];
       if (targetLocation) {
         const center = targetLocation.mapSection.center;
         this.map.setView(L.latLng(center.latitude, center.longitude), 10);
+        await this.fetchCars(targetLocation.name);
+        await this.drawCars();
       }
     }
   },
