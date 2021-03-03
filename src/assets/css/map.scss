@@ -146,6 +146,7 @@
   .filter-modal {
     display: flex;
     flex-direction: column;
+    justify-content: space-around;
     position: absolute;
     z-index: 9999999;
     background-color: gray;

@@ -47,15 +47,3 @@ export interface Car {
     model:string,
     fuel: number
 }
-
-export interface Icon {
-    name: string;
-    x: number;
-    y: number;
-}
-
-// export interface carMap{
-
-// }
-
-export interface Icons extends Array<Icon>{}

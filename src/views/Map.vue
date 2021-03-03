@@ -18,7 +18,12 @@
           v-model="fuelAmount"
         />
       </div>
-      <div>Car Model</div>
+      <div class="filter-models">
+        <div>Car Model</div>
+        <div v-for="car in carOptions" :key="car" @click="selectCar(car)">
+          <img :classs="`car-option${car}`" />{{ car }}
+        </div>
+      </div>
       <button class="apply-filter" @click="applyFilter">Apply Filter</button>
     </div>
     <i
@@ -52,8 +57,10 @@ export default Vue.extend({
     map: {} as L.Map,
     cars: [] as types.Cars,
     enableFilterModal: false,
-    fuelAmount: 0,
-    layerGroup: {} as L.LayerGroup
+    fuelAmount: -1,
+    layerGroup: {} as L.LayerGroup,
+    carOptions: [] as Array<string>,
+    carChoice: [] as Array<string>
   }),
   async mounted() {
     this.map = L.map("map", {
@@ -112,7 +119,7 @@ export default Vue.extend({
         );
         this.map.removeLayer(marker);
         await this.fetchCars(location.name);
-        await this.drawCars([]);
+        await this.drawCars(undefined);
       });
     },
 
@@ -121,10 +128,13 @@ export default Vue.extend({
         `https://web-chapter-coding-challenge-api-eu-central-1.dev.architecture.ridedev.io/api/architecture/web-chapter-coding-challenge-api/vehicles/${locationName}`
       );
       this.cars = response.data.data;
+      this.carOptions = response.data.data
+        .map(car => car.model)
+        .filter((v, i, a) => a.indexOf(v) === i);
     },
 
-    async drawCars(filterCars: types.Cars) {
-      const cars = (filterCars.length && filterCars) || this.cars;
+    async drawCars(filterCars: types.Cars| undefined) {
+      const cars = filterCars || this.cars;
       const layerGroup = L.layerGroup(
         cars.map(car => {
           const fuelLevel =
@@ -173,13 +183,21 @@ export default Vue.extend({
     async applyFilter() {
       this.map.removeLayer(this.layerGroup);
       const filterCars = this.cars.filter(
-        car => car.fuel * 100 > this.fuelAmount
+        car =>
+          car.fuel * 100 > this.fuelAmount &&
+          (!this.carChoice.length || this.carChoice.includes(car.model))
       );
       await this.drawCars(filterCars);
       this.enableFilterModal = false;
+    },
+
+    selectCar(carname: string) {
+      if (this.carChoice.includes(carname)) {
+      } else {
+        this.carChoice.push(carname);
+      }
     }
   },
-
   computed: {
     locationsNames() {
       return this.locations.map(location => location.name);
