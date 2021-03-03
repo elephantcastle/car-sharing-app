@@ -193,7 +193,7 @@ export default Vue.extend({
 
     selectCar(carname: string) {
       if (this.carChoice.includes(carname)) {
-        console.log(carname);
+        this.carChoice.splice(this.carChoice.indexOf(carname), 1);
       } else {
         this.carChoice.push(carname);
       }
