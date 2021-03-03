@@ -22,7 +22,7 @@
       <button class="apply-filter" @click="applyFilter">Apply Filter</button>
     </div>
     <i
-      v-if="!enableFilterModal"
+      v-if="!enableFilterModal && this.cars.length"
       class="filter-button"
       @click="enableFilterModal = !enableFilterModal"
     ></i>
@@ -50,9 +50,10 @@ export default Vue.extend({
   data: () => ({
     locations: [] as types.Locations,
     map: {} as L.Map,
-    cars: {} as types.Cars,
+    cars: [] as types.Cars,
     enableFilterModal: false,
-    fuelAmount: 0
+    fuelAmount: 0,
+    layerGroup: {}
   }),
   async mounted() {
     this.map = L.map("map", {
@@ -111,7 +112,7 @@ export default Vue.extend({
         );
         this.map.removeLayer(marker);
         await this.fetchCars(location.name);
-        await this.drawCars();
+        await this.drawCars([]);
       });
     },
 
@@ -122,9 +123,10 @@ export default Vue.extend({
       this.cars = response.data.data;
     },
 
-    async drawCars() {
+    async drawCars(filterCars: types.Cars) {
+      const cars = (filterCars.length && filterCars) || this.cars;
       const layerGroup = L.layerGroup(
-        this.cars.map(car => {
+        cars.map(car => {
           const fuelLevel =
             car.fuel * 100 < 30
               ? "red"
@@ -153,6 +155,7 @@ export default Vue.extend({
           });
         })
       );
+      this.layerGroup = layerGroup;
       this.map.addLayer(layerGroup);
     },
 
@@ -164,11 +167,17 @@ export default Vue.extend({
         const center = targetLocation.mapSection.center;
         this.map.setView(L.latLng(center.latitude, center.longitude), 10);
         await this.fetchCars(targetLocation.name);
-        await this.drawCars();
       }
     },
 
-    applyFilter(){}
+    async applyFilter() {
+      this.map.removeLayer(this.layerGroup);
+      const filterCars = this.cars.filter(
+        car => car.fuel * 100 > this.fuelAmount
+      );
+      await this.drawCars(filterCars);
+      this.enableFilterModal = false;
+    }
   },
 
   computed: {
