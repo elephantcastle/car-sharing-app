@@ -31,7 +31,7 @@ export default Vue.extend({
     locations: [] as types.Locations,
     map: {} as L.Map
   }),
-  mounted() {
+  async mounted() {
     this.map = L.map("map", {
       center: [51.5, 9.97],
       zoom: 5,
@@ -48,18 +48,47 @@ export default Vue.extend({
       ]
     });
 
-    this.fetchLocations(this.map);
+    await this.fetchLocations();
+    for (const location of this.locations) {
+      this.locationIcons(location);
+    }
   },
 
   methods: {
-    async fetchLocations(map: L.Map): Promise<void> {
+    async fetchLocations(): Promise<void> {
       const response: types.Response = await axios.get(
         "https://web-chapter-coding-challenge-api-eu-central-1.dev.architecture.ridedev.io/api/architecture/web-chapter-coding-challenge-api/locations"
       );
       this.locations = response.data.data;
-      for (const location of this.locations) {
-        await this.fetchCars(location.name, map);
-      }
+    },
+
+    async locationIcons(location: types.Location): Promise<void> {
+      const icon = L.icon({
+        iconRetinaUrl: require(`../assets/${location.name}.svg`),
+        iconUrl: require(`../assets/${location.name}.svg`),
+        shadowSize: [0, 0],
+        iconSize: [80, 80]
+      });
+      const marker = L.marker(
+        [
+          location.mapSection.center.latitude,
+          location.mapSection.center.longitude
+        ],
+        {
+          icon: icon
+        }
+      ).addTo(this.map);
+      marker.on("click", async () => {
+        this.map.setView(
+          [
+            location.mapSection.center.latitude,
+            location.mapSection.center.longitude
+          ],
+          12
+        );
+        this.map.removeLayer(marker);
+        this.fetchCars(location.name, this.map);
+      });
     },
 
     async fetchCars(locationName: string, map: L.Map): Promise<void> {
