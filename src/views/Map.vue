@@ -133,7 +133,7 @@ export default Vue.extend({
         .filter((v, i, a) => a.indexOf(v) === i);
     },
 
-    async drawCars(filterCars: types.Cars| undefined) {
+    async drawCars(filterCars: types.Cars | undefined) {
       const cars = filterCars || this.cars;
       const layerGroup = L.layerGroup(
         cars.map(car => {
@@ -193,6 +193,7 @@ export default Vue.extend({
 
     selectCar(carname: string) {
       if (this.carChoice.includes(carname)) {
+        console.log(carname);
       } else {
         this.carChoice.push(carname);
       }
