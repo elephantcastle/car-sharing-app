@@ -6,6 +6,26 @@
         city
       }}</option>
     </select>
+    <div class="filter-modal" v-if="enableFilterModal">
+      <div>
+        Fuel Level: {{ fuelAmount }}
+        <input
+          id="customRangeInput"
+          type="range"
+          min="0"
+          max="100"
+          step="5"
+          v-model="fuelAmount"
+        />
+      </div>
+      <div>Car Model</div>
+      <button class="apply-filter" @click="applyFilter">Apply Filter</button>
+    </div>
+    <i
+      v-if="!enableFilterModal"
+      class="filter-button"
+      @click="enableFilterModal = !enableFilterModal"
+    ></i>
     <div class="map" id="map"></div>
   </div>
 </template>
@@ -30,7 +50,9 @@ export default Vue.extend({
   data: () => ({
     locations: [] as types.Locations,
     map: {} as L.Map,
-    cars: {} as types.Cars
+    cars: {} as types.Cars,
+    enableFilterModal: false,
+    fuelAmount: 0
   }),
   async mounted() {
     this.map = L.map("map", {
@@ -144,7 +166,9 @@ export default Vue.extend({
         await this.fetchCars(targetLocation.name);
         await this.drawCars();
       }
-    }
+    },
+
+    applyFilter(){}
   },
 
   computed: {
