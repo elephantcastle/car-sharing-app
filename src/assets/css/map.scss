@@ -162,6 +162,9 @@ body {
 }
 .apply-filter {
   align-self: center !important;
+  margin: 0px 0 10px 0;
+  border-radius: 25px;
+  padding: 5px 10px;
 }
 
 .selected-car-stats {
@@ -197,11 +200,11 @@ body {
 
 .option-car-image{
     width: 50px;
+    margin-right: 25px;
 }
 .container-option-car-image{
     display: flex;
     align-items: center;
-    padding-left: 35px;
     justify-content: center;
     min-height: 45px;
     &.car-is-selected{
