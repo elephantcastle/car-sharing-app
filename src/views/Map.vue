@@ -6,6 +6,7 @@
         city
       }}</option>
     </select>
+
     <div class="filter-modal" v-if="enableFilterModal">
       <div>
         Fuel Level: {{ fuelAmount }}
@@ -21,13 +22,30 @@
       <div class="filter-models">
         <div>Car Model</div>
         <div v-for="car in carOptions" :key="car" @click="selectCar(car)">
-          <img :classs="`car-option${car}`" />{{ car }}
+          <img :class="`${car}`" />{{ car }}
         </div>
       </div>
       <button class="apply-filter" @click="applyFilter">Apply Filter</button>
     </div>
+
+    <div class="selected-car-panel" v-if="selectedCar.model">
+      <img
+        :src="require(`@/assets/models/${selectedCar.model}.png`)"
+        class="selected-car-image"
+      />
+      <div class="selected-car-model">
+        {{ selectedCar.model.split("_").join(" ") }}
+      </div>
+      <div class="selected-car-stats">
+        <div>Fuel: {{ selectedCar.fuel * 100 }}</div>
+        <div>NumberPlate: {{ selectedCar.numberPlate }}</div>
+      </div>
+    </div>
+
     <i
-      v-if="!enableFilterModal && this.cars.length"
+      v-if="
+        enableFilterModal == false && this.cars.length && !selectedCar.model
+      "
       class="filter-button"
       @click="enableFilterModal = !enableFilterModal"
     ></i>
@@ -60,7 +78,8 @@ export default Vue.extend({
     fuelAmount: -1,
     layerGroup: {} as L.LayerGroup,
     carOptions: [] as Array<string>,
-    carChoice: [] as Array<string>
+    carChoice: [] as Array<string>,
+    selectedCar: {} as types.Car
   }),
   async mounted() {
     this.map = L.map("map", {
@@ -71,12 +90,12 @@ export default Vue.extend({
         L.tileLayer(
           "https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png",
           {
-            maxZoom: 18,
-            attribution:
-              '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>'
+            maxZoom: 18
           }
         )
       ]
+    }).on("click", () => {
+      this.selectedCar = Object.assign({});
     });
 
     await this.fetchLocations();
@@ -158,6 +177,8 @@ export default Vue.extend({
             }
           );
           return marker.on("click", () => {
+            this.selectedCar = car;
+            this.enableFilterModal = false;
             this.map.setView(
               [car.position.latitude, car.position.longitude],
               20
