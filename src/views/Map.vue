@@ -55,7 +55,8 @@ export default Vue.extend({
     layerGroup: {} as L.LayerGroup,
     carOptions: [] as Array<string>,
     carChoice: [] as Array<string>,
-    selectedCar: {} as types.Car
+    selectedCar: {} as types.Car,
+    timeout: 0
   }),
   async mounted() {
     this.map = L.map("map", {
@@ -127,6 +128,10 @@ export default Vue.extend({
       this.carOptions = response.data.data
         .map(car => car.model)
         .filter((v, i, a) => a.indexOf(v) === i);
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        this.fetchCars(locationName);
+      }, 60000);
     },
 
     async drawCars(filterCars: types.Cars | undefined) {
