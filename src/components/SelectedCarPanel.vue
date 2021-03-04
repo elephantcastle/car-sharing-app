@@ -19,7 +19,7 @@ import Vue from "vue";
 import * as types from "@/common/types";
 
 export default Vue.extend({
-  name: "SelectedCar",
+  name: "SelectedCarPanel",
   props: {
     car: { type: Object as () => types.Car, default: {} }
   }

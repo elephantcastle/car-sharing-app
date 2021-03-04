@@ -13,7 +13,7 @@
       @applyfilter="applyFilter"
     />
 
-    <SelectedCar :car="selectedCar" />
+    <SelectedCarPanel :car="selectedCar" />
     <i
       v-if="
         enableFilterModal == false && this.cars.length && !selectedCar.model
@@ -32,7 +32,7 @@ import axios from "axios";
 import "leaflet/dist/leaflet.css";
 import "leaflet/dist/images/marker-shadow.png";
 import * as types from "@/common/types";
-import SelectedCar from "@/components/SelectedCar.vue";
+import SelectedCarPanel from "@/components/SelectedCarPanel.vue";
 import FilterModels from "@/components/FilterModels.vue";
 
 L.Icon.Default.mergeOptions({
@@ -44,7 +44,7 @@ L.Icon.Default.mergeOptions({
 export default Vue.extend({
   name: "Map",
   components: {
-    SelectedCar,
+    SelectedCarPanel,
     FilterModels
   },
   data: () => ({
@@ -52,7 +52,6 @@ export default Vue.extend({
     map: {} as L.Map,
     cars: [] as types.Cars,
     enableFilterModal: false,
-    fuelAmount: 0,
     layerGroup: {} as L.LayerGroup,
     carOptions: [] as Array<string>,
     carChoice: [] as Array<string>,
