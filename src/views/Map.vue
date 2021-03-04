@@ -7,34 +7,11 @@
       }}</option>
     </select>
 
-    <div class="filter-modal" v-if="enableFilterModal">
-      <div>
-        Fuel Level: {{ fuelAmount }}
-        <input
-          id="customRangeInput"
-          type="range"
-          min="0"
-          max="100"
-          step="5"
-          v-model="fuelAmount"
-        />
-      </div>
-      <div class="filter-models">
-        <div
-          v-for="car in carOptions"
-          :key="car"
-          @click="selectCar(car)"
-          :class="{ 'car-is-selected': carChoice.includes(car) }"
-          class="container-option-car-image"
-        >
-          <img
-            :src="require(`@/assets/models/${car}.png`)"
-            class="option-car-image"
-          />{{ car.split("_").join(" ") }}
-        </div>
-      </div>
-      <button class="apply-filter" @click="applyFilter">Apply Filter</button>
-    </div>
+    <FilterModels
+      v-if="enableFilterModal"
+      :carOptions="carOptions"
+      @applyfilter="applyFilter"
+    />
 
     <SelectedCar :car="selectedCar" />
     <i
@@ -56,6 +33,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet/dist/images/marker-shadow.png";
 import * as types from "@/common/types";
 import SelectedCar from "@/components/SelectedCar.vue";
+import FilterModels from "@/components/FilterModels.vue";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -66,7 +44,8 @@ L.Icon.Default.mergeOptions({
 export default Vue.extend({
   name: "Map",
   components: {
-    SelectedCar
+    SelectedCar,
+    FilterModels
   },
   data: () => ({
     locations: [] as types.Locations,
@@ -200,23 +179,15 @@ export default Vue.extend({
       }
     },
 
-    async applyFilter() {
+    async applyFilter(filter: [number, Array<string>]) {
       this.map.removeLayer(this.layerGroup);
       const filterCars = this.cars.filter(
         car =>
-          car.fuel * 100 > this.fuelAmount &&
-          (!this.carChoice.length || this.carChoice.includes(car.model))
+          car.fuel * 100 > filter[0] &&
+          (!this.carChoice.length || filter[1].includes(car.model))
       );
       await this.drawCars(filterCars);
       this.enableFilterModal = false;
-    },
-
-    selectCar(carname: string) {
-      if (this.carChoice.includes(carname)) {
-        this.carChoice.splice(this.carChoice.indexOf(carname), 1);
-      } else {
-        this.carChoice.push(carname);
-      }
     }
   },
   computed: {
