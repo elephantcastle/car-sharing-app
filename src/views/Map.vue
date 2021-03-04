@@ -77,13 +77,12 @@ L.Icon.Default.mergeOptions({
 
 export default Vue.extend({
   name: "Map",
-  components: {},
   data: () => ({
     locations: [] as types.Locations,
     map: {} as L.Map,
     cars: [] as types.Cars,
     enableFilterModal: false,
-    fuelAmount: -1,
+    fuelAmount: 0,
     layerGroup: {} as L.LayerGroup,
     carOptions: [] as Array<string>,
     carChoice: [] as Array<string>,
