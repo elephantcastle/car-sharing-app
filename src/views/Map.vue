@@ -35,12 +35,6 @@ import * as types from "@/common/types";
 import SelectedCarPanel from "@/components/SelectedCarPanel.vue";
 import FilterModels from "@/components/FilterModels.vue";
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png")
-});
-
 export default Vue.extend({
   name: "Map",
   components: {
