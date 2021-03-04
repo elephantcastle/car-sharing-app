@@ -103,6 +103,7 @@ export default Vue.extend({
       ]
     }).on("click", () => {
       this.selectedCar = Object.assign({});
+      this.enableFilterModal = false;
     });
 
     await this.fetchLocations();
