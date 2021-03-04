@@ -36,20 +36,7 @@
       <button class="apply-filter" @click="applyFilter">Apply Filter</button>
     </div>
 
-    <div class="selected-car-panel" v-if="selectedCar.model">
-      <img
-        :src="require(`@/assets/models/${selectedCar.model}.png`)"
-        class="selected-car-image"
-      />
-      <div class="selected-car-model">
-        {{ selectedCar.model.split("_").join(" ") }}
-      </div>
-      <div class="selected-car-stats">
-        <div>Fuel: {{ selectedCar.fuel * 100 }}</div>
-        <div>NumberPlate: {{ selectedCar.numberPlate }}</div>
-      </div>
-    </div>
-
+    <SelectedCar :car="selectedCar" />
     <i
       v-if="
         enableFilterModal == false && this.cars.length && !selectedCar.model
@@ -68,6 +55,7 @@ import axios from "axios";
 import "leaflet/dist/leaflet.css";
 import "leaflet/dist/images/marker-shadow.png";
 import * as types from "@/common/types";
+import SelectedCar from "@/components/SelectedCar.vue";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
@@ -77,6 +65,9 @@ L.Icon.Default.mergeOptions({
 
 export default Vue.extend({
   name: "Map",
+  components: {
+    SelectedCar
+  },
   data: () => ({
     locations: [] as types.Locations,
     map: {} as L.Map,
