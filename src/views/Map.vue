@@ -20,9 +20,17 @@
         />
       </div>
       <div class="filter-models">
-        <div>Car Model</div>
-        <div v-for="car in carOptions" :key="car" @click="selectCar(car)">
-          <img :class="`${car}`" />{{ car }}
+        <div
+          v-for="car in carOptions"
+          :key="car"
+          @click="selectCar(car)"
+          :class="{ 'car-is-selected': carChoice.includes(car) }"
+          class="container-option-car-image"
+        >
+          <img
+            :src="require(`@/assets/models/${car}.png`)"
+            class="option-car-image"
+          />{{ car.split("_").join(" ") }}
         </div>
       </div>
       <button class="apply-filter" @click="applyFilter">Apply Filter</button>
