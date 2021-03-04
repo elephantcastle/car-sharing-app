@@ -114,8 +114,8 @@ export default Vue.extend({
 
     async locationIcons(location: types.Location): Promise<void> {
       const icon = L.icon({
-        iconRetinaUrl: require(`../assets/${location.name}.svg`),
-        iconUrl: require(`../assets/${location.name}.svg`),
+        iconRetinaUrl: require(`../assets/cities/${location.name}.svg`),
+        iconUrl: require(`../assets/cities/${location.name}.svg`),
         shadowSize: [0, 0],
         iconSize: [80, 80]
       });
