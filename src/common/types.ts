@@ -5,8 +5,8 @@ export interface E {
 }
 
 export interface Location {
-    id:number,
-    name:string,
+    id: number,
+    name: string,
     mapSection: {
         center: {
             latitude: number,
@@ -24,26 +24,26 @@ export interface Location {
 }
 
 export interface Response {
-    data:{
+    data: {
         data: Array<Location>
     }
 }
 
 export interface ResponseCar {
-    data:{
+    data: {
         data: Array<Car>
     }
 }
 
-export interface Locations extends Array<Location>{}
+export interface Locations extends Array<Location> { }
 
-export interface Cars extends Array<Car>{}
+export interface Cars extends Array<Car> { }
 
 export interface Car {
     position: {
         latitude: number,
         longitude: number
     },
-    model:string,
+    model: string,
     fuel: number
 }
