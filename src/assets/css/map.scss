@@ -194,3 +194,17 @@ body {
   height: 400px;
   border: 2px dashed #333;
 }
+
+.option-car-image{
+    width: 50px;
+}
+.container-option-car-image{
+    display: flex;
+    align-items: center;
+    padding-left: 35px;
+    justify-content: center;
+    min-height: 45px;
+    &.car-is-selected{
+        background-color: lightblue;
+    }
+}
